@@ -34,7 +34,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    getDeviceToke();
     return Consumer<ThemeProvider>(builder: (context, provider, child) {
       return LocaleBuilder(
           builder: (locales) => MaterialApp(
@@ -49,13 +48,6 @@ class MyApp extends StatelessWidget {
                   ? LoginSecond()
                   : MainScreen()));
     });
-  }
-
-  Future<void> getDeviceToke() async {
-    final FirebaseMessaging _fcm = FirebaseMessaging.instance;
-    final token = await _fcm.getToken();
-    String tokennn = token.toString();
-    print("Token: $tokennn");
   }
 }
 
