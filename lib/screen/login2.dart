@@ -1,16 +1,25 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_locales/flutter_locales.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_button/group_button.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_app_by_dn/object/thongtin_object.dart';
+import 'package:todo_app_by_dn/provider/thongtin_provider.dart';
+
 import 'package:todo_app_by_dn/screen/regissterr_green.dart';
 import 'package:todo_app_by_dn/screen/vieccanlam_screen.dart';
-
+import '../provider/theme_provider.dart';
 import 'forgot_passwork_screen.dart';
 import 'main_screen.dart';
+import 'package:file/local.dart';
 
 class LoginSecond extends StatefulWidget {
   const LoginSecond({super.key});
@@ -23,8 +32,9 @@ class _LoginSecondState extends State<LoginSecond> {
   final txtEmail = TextEditingController();
   final txtPass = TextEditingController();
   final _auth = FirebaseAuth.instance;
-
   bool _obscureText = true;
+  final email = LocaleText('email');
+  final matkhau = LocaleText('matkhau');
 
   Future<void> Login(String email, String matkhau) async {
     try {
@@ -33,19 +43,14 @@ class _LoginSecondState extends State<LoginSecond> {
       _auth.authStateChanges().listen((event) {
         if (event != null) {
           Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => MainScreen(
-                        email: email,
-                        matkhau: matkhau,
-                      )));
+              context, MaterialPageRoute(builder: (context) => MainScreen()));
           final snackBar = SnackBar(
             /// need to set following properties for best effect of awesome_snackbar_content
             elevation: 0,
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.transparent,
             content: AwesomeSnackbarContent(
-              title: 'Chúc mừng',
+              title: languages[3],
               message: 'Bạn đã đăng nhập thành công',
 
               /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
@@ -65,7 +70,7 @@ class _LoginSecondState extends State<LoginSecond> {
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.transparent,
         content: AwesomeSnackbarContent(
-          title: 'Thông báo',
+          title: languages[2],
           message: 'Email hoặc mật khẩu không chính xác',
 
           /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
@@ -84,7 +89,33 @@ class _LoginSecondState extends State<LoginSecond> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  List<String> languages = [];
+  void douuu() {
+    final lang = Localizations.localeOf(context).languageCode.toString();
+    if (lang == 'vi') {
+      languages = [
+        'Mật khẩu',
+        'Cảnh báo',
+        'Thông báo',
+        'Chúc mừng',
+      ];
+    } else {
+      languages = [
+        'Password',
+        'Warnning',
+        'Notification',
+        'Congratulation',
+      ];
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    douuu();
     return WillPopScope(
         child: Scaffold(
           body: Container(
@@ -96,13 +127,13 @@ class _LoginSecondState extends State<LoginSecond> {
                 SizedBox(
                   height: 50,
                 ),
-                Text(
-                  'Đăng nhập',
+                LocaleText(
+                  'dangnhap',
                   style: GoogleFonts.beVietnamPro(
                       color: Colors.white, fontSize: 40),
                 ),
-                Text(
-                  '"Chúc bạn một ngày tốt lành"',
+                LocaleText(
+                  'loichuc',
                   style: GoogleFonts.beVietnamPro(
                       color: Colors.white, fontSize: 18),
                 ),
@@ -127,11 +158,10 @@ class _LoginSecondState extends State<LoginSecond> {
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 300),
-                            child: Text(
-                              "Email",
+                            child: LocaleText(
+                              'email',
                               style: GoogleFonts.beVietnamPro(
-                                fontSize: 18,
-                              ),
+                                  fontSize: 18, color: Colors.black),
                             ),
                           ),
                           const SizedBox(
@@ -141,8 +171,8 @@ class _LoginSecondState extends State<LoginSecond> {
                             padding: const EdgeInsets.symmetric(horizontal: 24),
                             child: Container(
                               decoration: BoxDecoration(
-                                  color: Colors.grey[200],
-                                  border: Border.all(color: Colors.white),
+                                  // color: Colors.grey[200],
+                                  border: Border.all(color: Colors.deepPurple),
                                   borderRadius: BorderRadius.circular(15)),
                               child: Padding(
                                 padding: const EdgeInsets.only(left: 15.0),
@@ -151,8 +181,14 @@ class _LoginSecondState extends State<LoginSecond> {
                                   decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: 'Email',
-                                      prefixIcon: Icon(Icons.mail)),
-                                  style: TextStyle(fontSize: 17),
+                                      hintStyle:
+                                          TextStyle(color: Colors.deepPurple),
+                                      prefixIcon: Icon(
+                                        Icons.mail,
+                                        color: Colors.deepPurple,
+                                      )),
+                                  style: TextStyle(
+                                      color: Colors.deepPurple, fontSize: 17),
                                 ),
                               ),
                             ),
@@ -161,14 +197,12 @@ class _LoginSecondState extends State<LoginSecond> {
                             height: 10,
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(right: 265),
-                            child: Text(
-                              "Mật khẩu",
-                              style: GoogleFonts.beVietnamPro(
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
+                              padding: const EdgeInsets.only(right: 265),
+                              child: LocaleText(
+                                'matkhau',
+                                style: GoogleFonts.beVietnamPro(
+                                    fontSize: 18, color: Colors.black),
+                              )),
                           const SizedBox(
                             height: 10,
                           ),
@@ -176,29 +210,37 @@ class _LoginSecondState extends State<LoginSecond> {
                             padding: const EdgeInsets.symmetric(horizontal: 24),
                             child: Container(
                               decoration: BoxDecoration(
-                                  color: Colors.grey[200],
-                                  border: Border.all(color: Colors.white),
+                                  border: Border.all(color: Colors.deepPurple),
                                   borderRadius: BorderRadius.circular(15)),
                               child: Padding(
                                 padding: const EdgeInsets.only(left: 15.0),
                                 child: TextField(
+                                  style: TextStyle(
+                                      color: Colors.deepPurple, fontSize: 17),
                                   controller: txtPass,
                                   obscureText: _obscureText,
                                   decoration: InputDecoration(
                                       border: InputBorder.none,
-                                      hintText: 'Mật khẩu',
-                                      prefixIcon: Icon(Icons.password),
+                                      hintText: languages[0],
+                                      hintStyle:
+                                          TextStyle(color: Colors.deepPurple),
+                                      prefixIcon: Icon(
+                                        Icons.password,
+                                        color: Colors.deepPurple,
+                                      ),
                                       suffixIcon: GestureDetector(
                                         onTap: () {
                                           setState(() {
                                             _obscureText = !_obscureText;
                                           });
                                         },
-                                        child: Icon(_obscureText
-                                            ? Icons.visibility_off
-                                            : Icons.visibility),
+                                        child: Icon(
+                                          _obscureText
+                                              ? Icons.visibility_off
+                                              : Icons.visibility,
+                                          color: Colors.deepPurple,
+                                        ),
                                       )),
-                                  style: TextStyle(fontSize: 17),
                                 ),
                               ),
                             ),
@@ -206,20 +248,19 @@ class _LoginSecondState extends State<LoginSecond> {
                           Padding(
                             padding: const EdgeInsets.only(left: 240, top: 10),
                             child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            ForgotPassword()));
-                              },
-                              child: Text(
-                                'Quên mật khẩu',
-                                style: TextStyle(
-                                    color: Colors.deepPurple,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              ForgotPassword()));
+                                },
+                                child: LocaleText(
+                                  'quenmatkhau',
+                                  style: TextStyle(
+                                      color: Colors.deepPurple,
+                                      fontWeight: FontWeight.bold),
+                                )),
                           ),
                           const SizedBox(
                             height: 25,
@@ -235,7 +276,7 @@ class _LoginSecondState extends State<LoginSecond> {
                                     behavior: SnackBarBehavior.floating,
                                     backgroundColor: Colors.transparent,
                                     content: AwesomeSnackbarContent(
-                                      title: 'Cảnh báo',
+                                      title: languages[1],
                                       message:
                                           'Bạn vui lòng nhập đầy đủ tất cả các ô',
 
@@ -255,7 +296,7 @@ class _LoginSecondState extends State<LoginSecond> {
                                     behavior: SnackBarBehavior.floating,
                                     backgroundColor: Colors.transparent,
                                     content: AwesomeSnackbarContent(
-                                      title: 'Cảnh báo',
+                                      title: languages[1],
                                       message:
                                           'Bạn chưa nhập đúng định dạng email',
 
@@ -268,6 +309,7 @@ class _LoginSecondState extends State<LoginSecond> {
                                     ..showSnackBar(snackBar);
                                   return;
                                 }
+
                                 Login(txtEmail.text, txtPass.text);
                               },
                               child: Container(
@@ -276,12 +318,11 @@ class _LoginSecondState extends State<LoginSecond> {
                                     color: Colors.deepPurple,
                                     borderRadius: BorderRadius.circular(15)),
                                 child: Center(
-                                  child: Text(
-                                    'Đăng nhập',
-                                    style: GoogleFonts.beVietnamPro(
-                                        fontSize: 18, color: Colors.white),
-                                  ),
-                                ),
+                                    child: LocaleText(
+                                  'dangnhap',
+                                  style: GoogleFonts.beVietnamPro(
+                                      fontSize: 18, color: Colors.white),
+                                )),
                               ),
                             ),
                           ),
@@ -291,7 +332,14 @@ class _LoginSecondState extends State<LoginSecond> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Bạn chưa có tài khoản?'),
+                              LocaleText(
+                                'chuacotaikhoan',
+                                style: GoogleFonts.beVietnamPro(
+                                    color: Colors.black),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
                               GestureDetector(
                                 onTap: () {
                                   Navigator.push(
@@ -299,15 +347,74 @@ class _LoginSecondState extends State<LoginSecond> {
                                       MaterialPageRoute(
                                           builder: (context) => Register()));
                                 },
-                                child: Text(
-                                  ' Đăng ký ngay!',
-                                  style: TextStyle(
-                                      color: Colors.deepPurple,
-                                      fontWeight: FontWeight.bold),
-                                ),
+                                child: LocaleText('dangky',
+                                    style: GoogleFonts.beVietnamPro(
+                                        color: Colors.deepPurple,
+                                        fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          LocaleText(
+                            'lang',
+                            style: GoogleFonts.beVietnamPro(
+                                color: Colors.deepPurple, fontSize: 16),
+                          ),
+                          Consumer<ThemeProvider>(
+                              builder: (context, provider, child) {
+                            return DropdownButton<String>(
+                                value: provider.currentLangugae,
+                                items: [
+                                  DropdownMenuItem<String>(
+                                      value: 'VNE',
+                                      child: Row(
+                                        children: [
+                                          Image.asset(
+                                            'assets/vietnam.png',
+                                            height: 40,
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            'VNE',
+                                            style: GoogleFonts.beVietnamPro(
+                                                color: Colors.deepPurple),
+                                          )
+                                        ],
+                                      )),
+                                  DropdownMenuItem(
+                                      value: 'ENG',
+                                      child: Row(
+                                        children: [
+                                          Image.asset(
+                                            'assets/unitedkingdom.png',
+                                            height: 40,
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            'ENG',
+                                            style: GoogleFonts.beVietnamPro(
+                                                color: Colors.deepPurple),
+                                          )
+                                        ],
+                                      )),
+                                ],
+                                onChanged: (String? value) {
+                                  if (value == 'VNE') {
+                                    provider.changeLanguage(value!);
+                                    LocaleNotifier.of(context)?.change('vi');
+                                  }
+                                  if (value == 'ENG') {
+                                    provider.changeLanguage(value!);
+                                    LocaleNotifier.of(context)?.change('en');
+                                  }
+                                });
+                          })
                         ],
                       ),
                     ),

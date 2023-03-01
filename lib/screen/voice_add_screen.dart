@@ -1,7 +1,9 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_locales/flutter_locales.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_button/group_button.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -12,17 +14,17 @@ import '../object/todolist_object.dart';
 import '../provider/todolist_provider.dart';
 
 class VoicAdd extends StatefulWidget {
-  String? email;
-  String? matkhau;
-  VoicAdd({this.email, this.matkhau});
+  VoicAdd({
+    Key? key,
+  }) : super(key: key);
   @override
-  State<VoicAdd> createState() => _VoicAddState(email: email, matkhau: matkhau);
+  State<VoicAdd> createState() => _VoicAddState();
 }
 
 class _VoicAddState extends State<VoicAdd> {
-  String? email;
-  String? matkhau;
-  _VoicAddState({this.email, this.matkhau});
+  _VoicAddState({
+    Key? key,
+  });
 
   SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
@@ -36,6 +38,18 @@ class _VoicAddState extends State<VoicAdd> {
   bool trangthai = false;
   bool trangthaixoa = false;
   int? douutien;
+  List<String> duutien = [];
+  List<String> thoigianlamm = [];
+  void douuu() {
+    final lang = Localizations.localeOf(context).languageCode.toString();
+    if (lang == 'vi') {
+      duutien = ['Cao', 'Trung bình', 'Thấp'];
+      thoigianlamm = ['Hôm nay', 'Để sau'];
+    } else {
+      duutien = ['Hight', 'Medium', 'Low'];
+      thoigianlamm = ['Today', 'Later'];
+    }
+  }
 
   @override
   void initState() {
@@ -54,7 +68,7 @@ class _VoicAddState extends State<VoicAdd> {
 
   Future<void> addToDo() {
     return TDL.add({
-      'email': email.toString(),
+      'email': FirebaseAuth.instance.currentUser!.email!.toString(),
       'id': id,
       'noidung': _lastWords,
       'douutien': douutien,
@@ -105,31 +119,29 @@ class _VoicAddState extends State<VoicAdd> {
 
   @override
   Widget build(BuildContext context) {
+    douuu();
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Thêm bằng giọng nói',
-          style: GoogleFonts.beVietnamPro(),
+        title: LocaleText(
+          'thembangiongnoi',
+          style: GoogleFonts.beVietnamPro(fontSize: 25),
         ),
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
       ),
-      drawer: NavigationDrawer(
-        email: email,
-        matkhau: matkhau,
-      ),
+      drawer: Drawww(),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
               padding: EdgeInsets.all(16),
-              child: Text(
+              child: LocaleText(
                 _speechToText.isListening
                     ? '$_lastWords'
                     : _speechEnabled
-                        ? 'Nhấn vào micro để bắt đầu ghi âm'
-                        : 'Micro không khả dụng',
+                        ? 'tittle1'
+                        : 'microerror',
                 style: GoogleFonts.beVietnamPro(),
               ),
             ),
@@ -145,8 +157,8 @@ class _VoicAddState extends State<VoicAdd> {
                     padding: const EdgeInsets.only(right: 180),
                     child: Container(
                       padding: EdgeInsets.all(16),
-                      child: Text(
-                        'Độ ưu tiên:',
+                      child: LocaleText(
+                        'douutien',
                         style: GoogleFonts.beVietnamPro(color: Colors.white),
                       ),
                     ),
@@ -160,18 +172,19 @@ class _VoicAddState extends State<VoicAdd> {
                             color: Colors.deepPurple[100]),
                         selectedTextStyle:
                             GoogleFonts.beVietnamPro(color: Colors.deepPurple),
+                        buttonWidth: 80,
                       ),
-                      buttons: ['Cao', 'Trung bình', 'Thấp'],
+                      buttons: duutien,
                       isRadio: true,
                       onSelected: (value, index, isSelected) {
                         douutien = index + 1;
                       }),
                   Padding(
-                    padding: const EdgeInsets.only(right: 180),
+                    padding: const EdgeInsets.only(right: 160),
                     child: Container(
                       padding: EdgeInsets.all(16),
-                      child: Text(
-                        'Độ ưu tiên:',
+                      child: LocaleText(
+                        'tglam',
                         style: GoogleFonts.beVietnamPro(color: Colors.white),
                       ),
                     ),
@@ -187,11 +200,9 @@ class _VoicAddState extends State<VoicAdd> {
                               color: Colors.deepPurple[100]),
                           selectedTextStyle: GoogleFonts.beVietnamPro(
                               color: Colors.deepPurple),
+                          buttonWidth: 80,
                         ),
-                        buttons: [
-                          'Hôm nay',
-                          'Để sau',
-                        ],
+                        buttons: thoigianlamm,
                         isRadio: true,
                         onSelected: (value, index, isSelected) {
                           if (index == 0) {
@@ -246,7 +257,7 @@ class _VoicAddState extends State<VoicAdd> {
                       color: Colors.deepPurple,
                       borderRadius: BorderRadius.circular(15)),
                   child: Center(
-                    child: Text('Thêm',
+                    child: LocaleText('them',
                         style: GoogleFonts.beVietnamPro(
                             color: Colors.white, fontSize: 15)),
                   ),

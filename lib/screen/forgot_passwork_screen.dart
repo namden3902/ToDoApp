@@ -2,6 +2,8 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_locales/flutter_locales.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:todo_app_by_dn/screen/login2.dart';
@@ -24,6 +26,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -48,10 +51,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(top: 10),
-                          child: Text(
-                            'Quên mật khẩu',
+                          child: LocaleText(
+                            'quenmatkhau',
                             style: GoogleFonts.beVietnamPro(
-                                fontSize: 30, color: Colors.white),
+                                fontSize: 20, color: Colors.white),
                           ),
                         ),
                       ],
@@ -62,8 +65,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             ),
             Padding(
               padding: const EdgeInsets.only(top: 10, left: 24, right: 24),
-              child: Text(
-                'Nhập địa chỉ email bạn đã đăng ký để nhận liên kết đặt lại mật khẩu',
+              child: LocaleText(
+                'title',
                 style:
                     GoogleFonts.beVietnamPro(fontSize: 20, color: Colors.black),
               ),
@@ -72,8 +75,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               padding: const EdgeInsets.all(24),
               child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.white),
+                    border: Border.all(color: Colors.deepPurple),
                     borderRadius: BorderRadius.circular(15)),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 15.0),
@@ -83,8 +85,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Email',
-                        prefixIcon: Icon(Icons.mail)),
-                    style: TextStyle(fontSize: 17),
+                        hintStyle: TextStyle(color: Colors.deepPurple),
+                        prefixIcon: Icon(
+                          Icons.mail,
+                          color: Colors.deepPurple,
+                        )),
+                    style: TextStyle(fontSize: 17, color: Colors.deepPurple),
                   ),
                 ),
               ),
@@ -185,8 +191,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       color: Colors.deepPurple,
                       borderRadius: BorderRadius.circular(15)),
                   child: Center(
-                    child: Text(
-                      'Xác nhận',
+                    child: LocaleText(
+                      'xacnhan',
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                   ),

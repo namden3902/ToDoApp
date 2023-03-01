@@ -1,27 +1,27 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
+import 'package:flutter_locales/flutter_locales.dart';
 import 'package:todo_app_by_dn/screen/login2.dart';
 import 'package:todo_app_by_dn/screen/main_screen.dart';
+import 'package:todo_app_by_dn/screen/notification_screen.dart';
 import 'package:todo_app_by_dn/screen/profile_screen.dart';
-import 'package:todo_app_by_dn/screen/vieccanlam_screen.dart';
-import 'package:todo_app_by_dn/screen/viechoathanh_screen.dart';
+import 'package:todo_app_by_dn/screen/settings.dart';
+
 import 'package:todo_app_by_dn/screen/voice_add_screen.dart';
 
-class NavigationDrawer extends StatefulWidget {
-  String? email;
-  String? matkhau;
-  NavigationDrawer({this.email, this.matkhau});
+class Drawww extends StatefulWidget {
+  Drawww({
+    Key? key,
+  }) : super(key: key);
 
   @override
-  State<NavigationDrawer> createState() =>
-      _NavigationDrawerState(emaill: email, matkhau: matkhau);
+  State<Drawww> createState() => _DrawwwState();
 }
 
-class _NavigationDrawerState extends State<NavigationDrawer> {
-  String? emaill;
-  String? matkhau;
-  _NavigationDrawerState({this.emaill, this.matkhau});
+class _DrawwwState extends State<Drawww> {
+  _DrawwwState({
+    Key? key,
+  });
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -74,7 +74,12 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                               width: 10,
                             ),
                             Text(
-                              emaill.toString(),
+                              FirebaseAuth.instance.currentUser!.email!
+                                          .toString() ==
+                                      null
+                                  ? ''
+                                  : FirebaseAuth.instance.currentUser!.email
+                                      .toString(),
                               style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold),
@@ -92,19 +97,16 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 Icons.home,
                 color: Colors.white,
               ),
-              title: const Text(
-                'Trang chủ',
+              title: const LocaleText(
+                'trangchu',
                 style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 18),
               ),
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => MainScreen(
-                          email: emaill,
-                          matkhau: matkhau,
-                        )));
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => MainScreen()));
               },
             ),
             Padding(
@@ -119,19 +121,16 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 Icons.mic,
                 color: Colors.white,
               ),
-              title: const Text(
-                'Thêm bằng giọng nói',
+              title: const LocaleText(
+                'thembangiongnoi',
                 style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 18),
               ),
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => VoicAdd(
-                          email: emaill,
-                          matkhau: matkhau,
-                        )));
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => VoicAdd()));
               },
             ),
             Padding(
@@ -146,8 +145,32 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 Icons.person,
                 color: Colors.white,
               ),
-              title: const Text(
-                'Tài khoản',
+              title: const LocaleText(
+                'taikhoan',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
+              ),
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => Profile()));
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20),
+              child: Divider(
+                color: Colors.white,
+                height: 2,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.notifications,
+                color: Colors.white,
+              ),
+              title: const LocaleText(
+                'thongbao',
                 style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -155,10 +178,31 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               ),
               onTap: () {
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => Profile(
-                          email: emaill,
-                          matkhau: matkhau,
-                        )));
+                    builder: (context) => NotificationScreen()));
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20),
+              child: Divider(
+                color: Colors.white,
+                height: 2,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.settings,
+                color: Colors.white,
+              ),
+              title: const LocaleText(
+                'caidat',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
+              ),
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => Settings()));
               },
             ),
             Padding(
@@ -173,16 +217,19 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 Icons.logout,
                 color: Colors.white,
               ),
-              title: const Text(
-                'Đăng xuất',
+              title: const LocaleText(
+                'dangxuat',
                 style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 18),
               ),
               onTap: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => LoginSecond()));
+                FirebaseAuth.instance.signOut();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => LoginSecond()),
+                  ModalRoute.withName('/'),
+                );
               },
             ),
             Padding(

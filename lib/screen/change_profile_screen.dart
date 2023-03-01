@@ -1,21 +1,26 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_locales/flutter_locales.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:todo_app_by_dn/object/thongtin_object.dart';
 import 'package:todo_app_by_dn/provider/thongtin_provider.dart';
 
 class ChangeProfiel extends StatefulWidget {
-  String? email;
-  ChangeProfiel({this.email});
+  ChangeProfiel({
+    Key? key,
+  }) : super(key: key);
   @override
-  State<ChangeProfiel> createState() => _ChangeProfielState(email1: email);
+  State<ChangeProfiel> createState() => _ChangeProfielState();
 }
 
 class _ChangeProfielState extends State<ChangeProfiel> {
-  String? email1;
-  _ChangeProfielState({this.email1});
+  _ChangeProfielState({
+    Key? key,
+  });
   CollectionReference users = FirebaseFirestore.instance.collection('users');
   TextEditingController txtHoTen = TextEditingController();
   int temp1 = 0;
@@ -28,12 +33,13 @@ class _ChangeProfielState extends State<ChangeProfiel> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<ThongTinObject>>(
-        future: ThongTinProvider.get(email1!),
+        future: ThongTinProvider.get(
+          FirebaseAuth.instance.currentUser!.email!.toString(),
+        ),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             List<ThongTinObject> thongTin = snapshot.data!;
             return Scaffold(
-              backgroundColor: Colors.white,
               body: SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -56,8 +62,8 @@ class _ChangeProfielState extends State<ChangeProfiel> {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.only(top: 80),
-                                  child: Text(
-                                    'Thông tin',
+                                  child: LocaleText(
+                                    'thongtin',
                                     style: GoogleFonts.beVietnamPro(
                                         fontSize: 30, color: Colors.white),
                                   ),
@@ -103,7 +109,7 @@ class _ChangeProfielState extends State<ChangeProfiel> {
                                         horizontal: 25),
                                     child: Container(
                                       decoration: BoxDecoration(
-                                          color: Colors.grey[200],
+                                          // color: Colors.grey[200],
                                           border:
                                               Border.all(color: Colors.white),
                                           borderRadius:
@@ -128,8 +134,8 @@ class _ChangeProfielState extends State<ChangeProfiel> {
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.only(right: 180),
-                                    child: Text(
-                                      'Tên người dùng:',
+                                    child: LocaleText(
+                                      'tenngdung',
                                       style: GoogleFonts.beVietnamPro(
                                           fontSize: 20, color: Colors.white),
                                     ),
@@ -142,7 +148,7 @@ class _ChangeProfielState extends State<ChangeProfiel> {
                                         horizontal: 25),
                                     child: Container(
                                       decoration: BoxDecoration(
-                                          color: Colors.grey[200],
+                                          // color: Colors.grey[200],
                                           border:
                                               Border.all(color: Colors.white),
                                           borderRadius:
@@ -183,25 +189,51 @@ class _ChangeProfielState extends State<ChangeProfiel> {
                               docID = snapshot.id;
                             }
                           }
-                          updateThongTin(txtHoTen.text).then((value) {
+                          if (txtHoTen.text == "") {
                             final snackBar = SnackBar(
                               /// need to set following properties for best effect of awesome_snackbar_content
                               elevation: 0,
                               behavior: SnackBarBehavior.floating,
                               backgroundColor: Colors.transparent,
                               content: AwesomeSnackbarContent(
-                                title: 'Chúc mừng',
-                                message: 'Bạn đã cập nhập thông tin thành công',
+                                title: 'Thông báo',
+                                message:
+                                    'Không có gì thay đổi để tiến hành cập nhập',
 
                                 /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
-                                contentType: ContentType.success,
+                                contentType: ContentType.failure,
                               ),
                             );
                             ScaffoldMessenger.of(context)
                               ..hideCurrentSnackBar()
                               ..showSnackBar(snackBar);
                             return;
-                          }).onError((error, stackTrace) => null);
+                          } else {
+                            updateThongTin(txtHoTen.text).then((value) {
+                              final snackBar = SnackBar(
+                                /// need to set following properties for best effect of awesome_snackbar_content
+                                elevation: 0,
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.transparent,
+                                content: AwesomeSnackbarContent(
+                                  title: 'Chúc mừng',
+                                  message:
+                                      'Bạn đã cập nhập thông tin thành công',
+
+                                  /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+                                  contentType: ContentType.success,
+                                ),
+                              );
+                              ScaffoldMessenger.of(context)
+                                ..hideCurrentSnackBar()
+                                ..showSnackBar(snackBar);
+                              setState(() {
+                                txtHoTen.text = '';
+                              });
+
+                              return;
+                            }).onError((error, stackTrace) => null);
+                          }
                         },
                         child: Container(
                           padding: EdgeInsets.all(10),
@@ -210,8 +242,8 @@ class _ChangeProfielState extends State<ChangeProfiel> {
                             borderRadius: BorderRadius.circular(15),
                           ),
                           child: Center(
-                            child: Text(
-                              'Cập nhập thông tin',
+                            child: LocaleText(
+                              'capnhap',
                               style:
                                   TextStyle(color: Colors.white, fontSize: 20),
                             ),
@@ -226,6 +258,12 @@ class _ChangeProfielState extends State<ChangeProfiel> {
                 ),
               ),
             );
+          } else {
+            return Center(
+                child: SpinKitRing(
+              size: 40,
+              color: Colors.deepPurple,
+            ));
           }
           return Text('');
         });

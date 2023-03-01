@@ -2,6 +2,8 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_locales/flutter_locales.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:todo_app_by_dn/object/thongtin_object.dart';
@@ -22,7 +24,7 @@ class _ChangePassworkState extends State<ChangePasswork> {
   String? email;
   String? matkhau;
   _ChangePassworkState({this.email, this.matkhau});
-  TextEditingController txtPass = TextEditingController();
+
   TextEditingController txtPassnew = TextEditingController();
   TextEditingController txtPassnewrw = TextEditingController();
   CollectionReference users = FirebaseFirestore.instance.collection('users');
@@ -32,16 +34,30 @@ class _ChangePassworkState extends State<ChangePasswork> {
   bool _oobscureText2 = true;
   int temp1 = 0;
   int temp2 = 0;
+
   var docID;
   var querySnapshots;
+
+  List<String> hint = [];
+  void ngonngu() {
+    final lang = Localizations.localeOf(context).languageCode.toString();
+    if (lang == 'vi') {
+      hint = ['Mật khẩu mới', 'Nhập lại mật khẩu mới'];
+    } else {
+      hint = ['New password', 'Re-enter new password'];
+    }
+  }
+
   Future<void> updateMatKhau(String matkhau) {
     return users.doc(docID).update({'matkhau': matkhau});
   }
 
   @override
   Widget build(BuildContext context) {
+    ngonngu();
     return FutureBuilder<List<ThongTinObject>>(
-      future: ThongTinProvider.get(email!),
+      future: ThongTinProvider.get(
+          FirebaseAuth.instance.currentUser!.email!.toString()),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           List<ThongTinObject> thongTin = snapshot.data!;
@@ -68,10 +84,10 @@ class _ChangePassworkState extends State<ChangePasswork> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.only(top: 10),
-                                child: Text(
-                                  'Đổi mật khẩu',
+                                child: LocaleText(
+                                  'doimk',
                                   style: GoogleFonts.beVietnamPro(
-                                      fontSize: 30, color: Colors.white),
+                                      fontSize: 25, color: Colors.white),
                                 ),
                               ),
                             ],
@@ -84,36 +100,6 @@ class _ChangePassworkState extends State<ChangePasswork> {
                   SizedBox(
                     height: 25,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          border: Border.all(color: Colors.white),
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 15.0),
-                        child: TextField(
-                          controller: txtPass,
-                          obscureText: _obscureText,
-                          decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Mật khẩu hiện tại',
-                              suffixIcon: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _obscureText = !_obscureText;
-                                  });
-                                },
-                                child: Icon(_obscureText
-                                    ? Icons.visibility_off
-                                    : Icons.visibility),
-                              )),
-                          style: TextStyle(fontSize: 17),
-                        ),
-                      ),
-                    ),
-                  ),
                   SizedBox(
                     height: 10,
                   ),
@@ -121,8 +107,8 @@ class _ChangePassworkState extends State<ChangePasswork> {
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: Container(
                       decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          border: Border.all(color: Colors.white),
+                          // color: Colors.grey[200],
+                          border: Border.all(color: Colors.deepPurple),
                           borderRadius: BorderRadius.circular(15)),
                       child: Padding(
                         padding: const EdgeInsets.only(left: 15.0),
@@ -131,7 +117,7 @@ class _ChangePassworkState extends State<ChangePasswork> {
                           obscureText: _oobscureText1,
                           decoration: InputDecoration(
                               border: InputBorder.none,
-                              hintText: 'Mật khẩu mới',
+                              hintText: hint[0],
                               suffixIcon: GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -154,8 +140,8 @@ class _ChangePassworkState extends State<ChangePasswork> {
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: Container(
                       decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          border: Border.all(color: Colors.white),
+                          // color: Colors.grey[200],
+                          border: Border.all(color: Colors.deepPurple),
                           borderRadius: BorderRadius.circular(15)),
                       child: Padding(
                         padding: const EdgeInsets.only(left: 15.0),
@@ -164,7 +150,7 @@ class _ChangePassworkState extends State<ChangePasswork> {
                           obscureText: _oobscureText2,
                           decoration: InputDecoration(
                               border: InputBorder.none,
-                              hintText: 'Nhập lại mật khẩu mới',
+                              hintText: hint[1],
                               suffixIcon: GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -188,9 +174,7 @@ class _ChangePassworkState extends State<ChangePasswork> {
                     child: GestureDetector(
                       onTap: () async {
                         //Kiểm tra ô trống
-                        if (txtPass.text == "" ||
-                            txtPassnew.text == "" ||
-                            txtPassnewrw == "") {
+                        if (txtPassnew.text == "" || txtPassnewrw == "") {
                           final snackBar = SnackBar(
                             /// need to set following properties for best effect of awesome_snackbar_content
                             elevation: 0,
@@ -209,27 +193,7 @@ class _ChangePassworkState extends State<ChangePasswork> {
                             ..showSnackBar(snackBar);
                           return;
                         }
-                        //Kiểm tra nhập dữ liệu ở ô mật khẩu hiện tại
-                        if (txtPass.text != matkhau) {
-                          final snackBar = SnackBar(
-                            /// need to set following properties for best effect of awesome_snackbar_content
-                            elevation: 0,
-                            behavior: SnackBarBehavior.floating,
-                            backgroundColor: Colors.transparent,
-                            content: AwesomeSnackbarContent(
-                              title: 'Oh không',
-                              message:
-                                  'Mật khẩu bạn nhập không trùng khớp với mật khẩu hiện tại',
 
-                              /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
-                              contentType: ContentType.failure,
-                            ),
-                          );
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(snackBar);
-                          return;
-                        }
                         //Kiểm tra độ dài mật khẩu mới
                         if (txtPassnew.text.length < 6) {
                           final snackBar = SnackBar(
@@ -270,34 +234,18 @@ class _ChangePassworkState extends State<ChangePasswork> {
                             ..hideCurrentSnackBar()
                             ..showSnackBar(snackBar);
                           return;
-                        } else if (txtPassnew.text == matkhau) {
-                          final snackBar = SnackBar(
-                            /// need to set following properties for best effect of awesome_snackbar_content
-                            elevation: 0,
-                            behavior: SnackBarBehavior.floating,
-                            backgroundColor: Colors.transparent,
-                            content: AwesomeSnackbarContent(
-                              title: 'Oh không',
-                              message:
-                                  'Mật khẩu mới đang trùng với mật khẩu hiện tại',
-
-                              /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
-                              contentType: ContentType.failure,
-                            ),
-                          );
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(snackBar);
                         } else {
                           final user = await _auth
                               ?.updatePassword(txtPassnew.text)
                               .then((value) {
                             updateMatKhau(txtPassnew.text);
                             FirebaseAuth.instance.signOut();
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LoginSecond()));
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginSecond()),
+                              ModalRoute.withName('/'),
+                            );
                             final snackBar = SnackBar(
                               /// need to set following properties for best effect of awesome_snackbar_content
                               elevation: 0,
@@ -342,8 +290,8 @@ class _ChangePassworkState extends State<ChangePasswork> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Center(
-                          child: Text(
-                            'Thay đổi',
+                          child: LocaleText(
+                            'thaydoi',
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                         ),
@@ -360,8 +308,13 @@ class _ChangePassworkState extends State<ChangePasswork> {
               ),
             ),
           );
+        } else {
+          return Center(
+              child: SpinKitRing(
+            size: 40,
+            color: Colors.deepPurple,
+          ));
         }
-        return Text('');
       },
     );
   }

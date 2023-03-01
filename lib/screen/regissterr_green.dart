@@ -6,6 +6,8 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_locales/flutter_locales.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:todo_app_by_dn/object/thongtin_object.dart';
@@ -22,6 +24,8 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final _auth = FirebaseAuth.instance;
   CollectionReference uSers = FirebaseFirestore.instance.collection('users');
+  CollectionReference notifications =
+      FirebaseFirestore.instance.collection('notifications');
   TextEditingController txtEmail = TextEditingController();
   TextEditingController txtHoten = TextEditingController();
   TextEditingController txtMatkhau = TextEditingController();
@@ -31,6 +35,16 @@ class _RegisterState extends State<Register> {
     final data = await ThongTinProvider.getData();
     setState(() {});
     thongTin = data;
+  }
+
+  List<String> hint = [];
+  void douuu() {
+    final lang = Localizations.localeOf(context).languageCode.toString();
+    if (lang == 'vi') {
+      hint = ['Email', 'Họ và tên', 'Mật khẩu', 'Nhập lại mật khẩu'];
+    } else {
+      hint = ['Email', 'Full name', 'Password', 'Re-enter password'];
+    }
   }
 
   bool _obscureText = true;
@@ -56,9 +70,20 @@ class _RegisterState extends State<Register> {
     return isvalid;
   }
 
+  Future<void> addNoti() {
+    return notifications.add({
+      'email': FirebaseAuth.instance.currentUser!.email!.toString(),
+      'trangthai': false,
+      'hour': '',
+      'minute': ''
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    douuu();
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -80,9 +105,9 @@ class _RegisterState extends State<Register> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(top: 10),
-                            child: Text('Đăng ký',
+                            child: LocaleText('dangki',
                                 style: GoogleFonts.beVietnamPro(
-                                    fontSize: 40, color: Colors.white)),
+                                    fontSize: 30, color: Colors.white)),
                           ),
                         ],
                       ),
@@ -99,16 +124,17 @@ class _RegisterState extends State<Register> {
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.white),
+                    border: Border.all(color: Colors.deepPurple),
                     borderRadius: BorderRadius.circular(15)),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 15.0),
                   child: TextField(
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                        border: InputBorder.none, hintText: 'Email'),
-                    style: TextStyle(fontSize: 17),
+                        border: InputBorder.none,
+                        hintText: hint[0],
+                        hintStyle: TextStyle(color: Colors.deepPurple)),
+                    style: TextStyle(fontSize: 17, color: Colors.deepPurple),
                     controller: txtEmail,
                   ),
                 ),
@@ -121,15 +147,16 @@ class _RegisterState extends State<Register> {
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.white),
+                    border: Border.all(color: Colors.deepPurple),
                     borderRadius: BorderRadius.circular(15)),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 15.0),
                   child: TextField(
                     decoration: InputDecoration(
-                        border: InputBorder.none, hintText: 'Họ và tên'),
-                    style: TextStyle(fontSize: 17),
+                        border: InputBorder.none,
+                        hintText: hint[1],
+                        hintStyle: TextStyle(color: Colors.deepPurple)),
+                    style: TextStyle(fontSize: 17, color: Colors.deepPurple),
                     controller: txtHoten,
                   ),
                 ),
@@ -142,8 +169,7 @@ class _RegisterState extends State<Register> {
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.white),
+                    border: Border.all(color: Colors.deepPurple),
                     borderRadius: BorderRadius.circular(15)),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 15.0),
@@ -151,18 +177,22 @@ class _RegisterState extends State<Register> {
                     obscureText: _obscureText,
                     decoration: InputDecoration(
                         border: InputBorder.none,
-                        hintText: 'Mật khẩu',
+                        hintText: hint[2],
+                        hintStyle: TextStyle(color: Colors.deepPurple),
                         suffixIcon: GestureDetector(
                           onTap: () {
                             setState(() {
                               _obscureText = !_obscureText;
                             });
                           },
-                          child: Icon(_obscureText
-                              ? Icons.visibility_off
-                              : Icons.visibility),
+                          child: Icon(
+                            _obscureText
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.deepPurple,
+                          ),
                         )),
-                    style: TextStyle(fontSize: 17),
+                    style: TextStyle(fontSize: 17, color: Colors.deepPurple),
                     controller: txtMatkhau,
                   ),
                 ),
@@ -175,8 +205,7 @@ class _RegisterState extends State<Register> {
               padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.white),
+                    border: Border.all(color: Colors.deepPurple),
                     borderRadius: BorderRadius.circular(15)),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 15.0),
@@ -184,18 +213,22 @@ class _RegisterState extends State<Register> {
                     obscureText: _obscureText2,
                     decoration: InputDecoration(
                         border: InputBorder.none,
-                        hintText: 'Nhập lại mật khẩu',
+                        hintText: hint[3],
+                        hintStyle: TextStyle(color: Colors.deepPurple),
                         suffixIcon: GestureDetector(
                           onTap: () {
                             setState(() {
                               _obscureText2 = !_obscureText2;
                             });
                           },
-                          child: Icon(_obscureText2
-                              ? Icons.visibility_off
-                              : Icons.visibility),
+                          child: Icon(
+                            _obscureText2
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.deepPurple,
+                          ),
                         )),
-                    style: TextStyle(fontSize: 17),
+                    style: TextStyle(fontSize: 17, color: Colors.deepPurple),
                     controller: txtRWMatkhau,
                   ),
                 ),
@@ -338,6 +371,7 @@ class _RegisterState extends State<Register> {
                         ..hideCurrentSnackBar()
                         ..showSnackBar(snackBar);
                       addUser();
+                      addNoti();
                     }
                   } catch (e) {
                     Navigator.push(context,
@@ -366,7 +400,7 @@ class _RegisterState extends State<Register> {
                       color: Colors.deepPurple,
                       borderRadius: BorderRadius.circular(15)),
                   child: Center(
-                    child: Text('Đăng ký',
+                    child: LocaleText('dangki',
                         style: GoogleFonts.beVietnamPro(
                             color: Colors.white, fontSize: 20)),
                   ),
@@ -379,15 +413,15 @@ class _RegisterState extends State<Register> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Bạn đã có tài khoản?',
+                LocaleText('dacotaikhaon',
                     style: GoogleFonts.beVietnamPro(
-                        color: Colors.black, fontSize: 14)),
+                        fontSize: 14, color: Colors.black)),
                 GestureDetector(
                   onTap: () {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => LoginSecond()));
                   },
-                  child: Text(' Đăng nhập ngay!',
+                  child: LocaleText('dangnhapp',
                       style: GoogleFonts.beVietnamPro(
                           color: Colors.deepPurple, fontSize: 14)),
                 ),

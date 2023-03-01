@@ -12,7 +12,7 @@
     </queries>
    <application
    android:usesCleartextTraffic="true"
-        android:label="todo_app_by_dn"
+        android:label="Todo List"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
