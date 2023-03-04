@@ -8,6 +8,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_locales/flutter_locales.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:group_button/group_button.dart';
 import 'package:lottie/lottie.dart';
@@ -157,6 +158,8 @@ class _ViecCanLamState extends State<ViecCanLam> {
         });
   }
 
+  List<ToDoObject> toDoOJ = [];
+  List<ToDoObject> toDoLT = [];
   @override
   Widget build(BuildContext context) {
     douuu();
@@ -316,505 +319,938 @@ class _ViecCanLamState extends State<ViecCanLam> {
         backgroundColor: Colors.white,
       ),
       body: WillPopScope(
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                children: [
-                  SizedBox(
-                    height: 10,
-                  ),
-                  FutureBuilder<List<ToDoObject>>(
+              SizedBox(
+                height: 10,
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(right: 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 170),
+                        child: Row(
+                          children: [
+                            LocaleText(
+                              'homnay',
+                              style: GoogleFonts.beVietnamPro(fontSize: 20),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuButton(
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                              onTap: () async {
+                                querySnapshots = await TDL.get();
+                                for (int i = 0; i < toDoOJ.length; i++) {
+                                  for (var snapshot in querySnapshots.docs) {
+                                    if (toDoOJ[i].id == snapshot['id']) {
+                                      docID = snapshot.id;
+                                    }
+                                  }
+                                  updateToDo(docID, !trangthai);
+                                }
+                                setState(() {});
+                              },
+                              child: Row(
+                                children: [
+                                  LocaleText(
+                                    'hoanthanhtatca',
+                                    style: GoogleFonts.beVietnamPro(
+                                        color: Colors.white),
+                                  ),
+                                  Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                  )
+                                ],
+                              )),
+                          PopupMenuItem(
+                              onTap: () async {
+                                querySnapshots = await TDL.get();
+                                for (int i = 0; i < toDoOJ.length; i++) {
+                                  for (var snapshot in querySnapshots.docs) {
+                                    if (toDoOJ[i].id == snapshot['id']) {
+                                      docID = snapshot.id;
+                                    }
+                                  }
+                                  deleteToDo(docID, !trangthaixoa);
+                                }
+                                setState(() {});
+                              },
+                              child: Row(
+                                children: [
+                                  LocaleText(
+                                    'xoatatca',
+                                    style: GoogleFonts.beVietnamPro(
+                                        color: Colors.white),
+                                  ),
+                                  Icon(
+                                    Icons.delete,
+                                    color: Colors.white,
+                                  )
+                                ],
+                              ))
+                        ],
+                        color: Colors.deepPurple,
+                      )
+                    ],
+                  )),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.deepPurple,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      )),
+                  child: FutureBuilder<List<ToDoObject>>(
                     future: ToDoProvider.getAll(
                         FirebaseAuth.instance.currentUser!.email.toString(),
                         trangthai,
                         ngaythang),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        List<ToDoObject> toDoOJ = snapshot.data!;
+                        toDoOJ = snapshot.data!;
                         toDoOJ
                             .sort(((a, b) => a.douutien.compareTo(b.douutien)));
-                        return Column(
-                          children: [
-                            Padding(
-                                padding: const EdgeInsets.only(right: 0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 150),
-                                      child: Row(
-                                        children: [
-                                          LocaleText(
-                                            'homnay',
-                                            style: GoogleFonts.beVietnamPro(
-                                                fontSize: 20),
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          CircleAvatar(
-                                            child: Text(
-                                              toDoOJ.length.toString(),
-                                              style: GoogleFonts.beVietnamPro(
-                                                  color: Colors.white),
-                                            ),
-                                            backgroundColor: Colors.deepPurple,
-                                          )
-                                        ],
+                        return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: toDoOJ.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Slidable(
+                                  endActionPane: ActionPane(
+                                    motion: StretchMotion(),
+                                    children: [
+                                      SlidableAction(
+                                        onPressed: ((context) async {
+                                          bool delete = true;
+                                          querySnapshots = await TDL.get();
+                                          for (var snapshot
+                                              in querySnapshots.docs) {
+                                            if (toDoOJ[index].id ==
+                                                snapshot['id']) {
+                                              docID = snapshot.id;
+                                            }
+                                          }
+                                          deleteToDo(docID, delete);
+                                          // setState(() {});
+                                        }),
+                                        icon: Icons.delete,
+                                        backgroundColor:
+                                            Colors.deepOrangeAccent,
                                       ),
-                                    ),
-                                    PopupMenuButton(
-                                      itemBuilder: (context) => [
-                                        PopupMenuItem(
-                                            onTap: () async {
-                                              querySnapshots = await TDL.get();
-                                              for (int i = 0;
-                                                  i < toDoOJ.length;
-                                                  i++) {
-                                                for (var snapshot
-                                                    in querySnapshots.docs) {
-                                                  if (toDoOJ[i].id ==
-                                                      snapshot['id']) {
-                                                    docID = snapshot.id;
-                                                  }
-                                                }
-                                                updateToDo(docID, !trangthai);
-                                              }
-                                              setState(() {});
-                                            },
-                                            child: Row(
-                                              children: [
-                                                LocaleText(
-                                                  'hoanthanhtatca',
+                                      SlidableAction(
+                                        onPressed: ((context) async {
+                                          // setState(() {});
+                                          _loadID();
+                                          id = toDO.length + 1;
+                                          addTodoCopy(
+                                              toDoOJ[index].noidung,
+                                              toDoOJ[index].douutien,
+                                              toDoOJ[index].thoigianlam);
+                                        }),
+                                        icon: Icons.copy,
+                                        backgroundColor: Colors.redAccent,
+                                      ),
+                                    ],
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      txtND.text =
+                                          toDoOJ[index].noidung.toString();
+                                      grbController.selectIndex(
+                                          toDoOJ[index].douutien - 1);
+                                      douutien = toDoOJ[index].douutien;
+                                      if (toDoOJ[index].thoigianlam ==
+                                          ngaythang) {
+                                        _grbController.selectIndex(0);
+                                      }
+                                      if (toDoOJ[index].thoigianlam !=
+                                              ngaythang ||
+                                          toDoOJ[index].thoigianlam == '') {
+                                        _grbController.selectIndex(1);
+                                      }
+                                      thoigianlam = toDoOJ[index].thoigianlam;
+                                      showDialog(
+                                          context: context,
+                                          builder: ((BuildContext context) {
+                                            return AlertDialog(
+                                              title: LocaleText('thaydoi',
                                                   style:
                                                       GoogleFonts.beVietnamPro(
-                                                          color: Colors.white),
-                                                ),
-                                                Icon(
-                                                  Icons.check,
-                                                  color: Colors.white,
-                                                )
-                                              ],
-                                            )),
-                                        PopupMenuItem(
-                                            onTap: () async {
-                                              querySnapshots = await TDL.get();
-                                              for (int i = 0;
-                                                  i < toDoOJ.length;
-                                                  i++) {
-                                                for (var snapshot
-                                                    in querySnapshots.docs) {
-                                                  if (toDoOJ[i].id ==
-                                                      snapshot['id']) {
-                                                    docID = snapshot.id;
-                                                  }
-                                                }
-                                                deleteToDo(
-                                                    docID, !trangthaixoa);
-                                              }
-                                              setState(() {});
-                                            },
-                                            child: Row(
-                                              children: [
-                                                LocaleText(
-                                                  'xoatatca',
-                                                  style:
-                                                      GoogleFonts.beVietnamPro(
-                                                          color: Colors.white),
-                                                ),
-                                                Icon(
-                                                  Icons.delete,
-                                                  color: Colors.white,
-                                                )
-                                              ],
-                                            ))
-                                      ],
-                                      color: Colors.deepPurple,
-                                    )
-                                  ],
-                                )),
-                            ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: toDoOJ.length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Slidable(
-                                      endActionPane: ActionPane(
-                                        motion: StretchMotion(),
-                                        children: [
-                                          SlidableAction(
-                                            onPressed: ((context) async {
-                                              bool delete = true;
-                                              querySnapshots = await TDL.get();
-                                              for (var snapshot
-                                                  in querySnapshots.docs) {
-                                                if (toDoOJ[index].id ==
-                                                    snapshot['id']) {
-                                                  docID = snapshot.id;
-                                                }
-                                              }
-                                              deleteToDo(docID, delete);
-                                              // setState(() {});
-                                            }),
-                                            icon: Icons.delete,
-                                            backgroundColor:
-                                                Colors.deepOrangeAccent,
-                                          ),
-                                          SlidableAction(
-                                            onPressed: ((context) async {
-                                              // setState(() {});
-                                              _loadID();
-                                              id = toDO.length + 1;
-                                              addTodoCopy(
-                                                  toDoOJ[index].noidung,
-                                                  toDoOJ[index].douutien,
-                                                  toDoOJ[index].thoigianlam);
-                                            }),
-                                            icon: Icons.copy,
-                                            backgroundColor: Colors.redAccent,
-                                          ),
-                                        ],
-                                      ),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          txtND.text =
-                                              toDoOJ[index].noidung.toString();
-                                          grbController.selectIndex(
-                                              toDoOJ[index].douutien - 1);
-                                          douutien = toDoOJ[index].douutien;
-                                          if (toDoOJ[index].thoigianlam ==
-                                              ngaythang) {
-                                            _grbController.selectIndex(0);
-                                          }
-                                          if (toDoOJ[index].thoigianlam !=
-                                                  ngaythang ||
-                                              toDoOJ[index].thoigianlam == '') {
-                                            _grbController.selectIndex(1);
-                                          }
-                                          thoigianlam =
-                                              toDoOJ[index].thoigianlam;
-                                          showDialog(
-                                              context: context,
-                                              builder: ((BuildContext context) {
-                                                return AlertDialog(
-                                                  title: LocaleText('thaydoi',
-                                                      style: GoogleFonts
-                                                          .beVietnamPro(
-                                                              fontSize: 25,
-                                                              color: Colors
-                                                                  .white)),
-                                                  content:
-                                                      SingleChildScrollView(
-                                                    child: SizedBox(
-                                                      height: 250,
-                                                      child: Column(
+                                                          fontSize: 25,
+                                                          color: Colors.white)),
+                                              content: SingleChildScrollView(
+                                                child: SizedBox(
+                                                  height: 250,
+                                                  child: Column(
+                                                    children: [
+                                                      Stack(
                                                         children: [
-                                                          Stack(
-                                                            children: [
-                                                              Container(
-                                                                decoration: BoxDecoration(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                                color: Colors
+                                                                    .white,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
                                                                             8)),
-                                                                height: 100,
-                                                              ),
-                                                              Padding(
-                                                                padding: EdgeInsets
-                                                                    .only(
-                                                                        left:
-                                                                            190,
-                                                                        top: 8),
-                                                                child:
-                                                                    Container(
-                                                                  decoration: BoxDecoration(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              8)),
-                                                                  child: Lottie.asset(
-                                                                      'assets/writting.json',
-                                                                      fit: BoxFit
-                                                                          .cover),
-                                                                ),
-                                                              ),
-                                                              TextField(
-                                                                decoration: InputDecoration(
-                                                                    border:
-                                                                        InputBorder
-                                                                            .none,
-                                                                    hintText:
-                                                                        'Ghi vào đây việc bạn cần làm'),
-                                                                style: GoogleFonts
-                                                                    .beVietnamPro(
-                                                                        fontSize:
-                                                                            16,
-                                                                        color: Colors
-                                                                            .black),
-                                                                controller:
-                                                                    txtND,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          SizedBox(
-                                                            height: 10,
+                                                            height: 100,
                                                           ),
                                                           Padding(
                                                             padding:
-                                                                const EdgeInsets
-                                                                        .only(
-                                                                    right: 190),
-                                                            child: LocaleText(
-                                                              'douutien',
-                                                              style: GoogleFonts
-                                                                  .beVietnamPro(
-                                                                      fontSize:
-                                                                          16,
-                                                                      color: Colors
-                                                                          .white),
-                                                            ),
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              GroupButton(
-                                                                controller:
-                                                                    grbController,
-                                                                options:
-                                                                    GroupButtonOptions(
+                                                                EdgeInsets.only(
+                                                                    left: 190,
+                                                                    top: 8),
+                                                            child: Container(
+                                                              decoration: BoxDecoration(
                                                                   borderRadius:
                                                                       BorderRadius
                                                                           .circular(
-                                                                              8),
-                                                                  unselectedColor:
-                                                                      Colors.grey[
-                                                                          50],
-                                                                  selectedColor:
-                                                                      Colors
-                                                                          .white,
-                                                                  unselectedTextStyle: GoogleFonts.beVietnamPro(
+                                                                              8)),
+                                                              child: Lottie.asset(
+                                                                  'assets/writting.json',
+                                                                  fit: BoxFit
+                                                                      .cover),
+                                                            ),
+                                                          ),
+                                                          TextField(
+                                                            decoration: InputDecoration(
+                                                                border:
+                                                                    InputBorder
+                                                                        .none,
+                                                                hintText:
+                                                                    'Ghi vào đây việc bạn cần làm'),
+                                                            style: GoogleFonts
+                                                                .beVietnamPro(
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .black),
+                                                            controller: txtND,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                right: 190),
+                                                        child: LocaleText(
+                                                          'douutien',
+                                                          style: GoogleFonts
+                                                              .beVietnamPro(
+                                                                  fontSize: 16,
+                                                                  color: Colors
+                                                                      .white),
+                                                        ),
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          GroupButton(
+                                                            controller:
+                                                                grbController,
+                                                            options:
+                                                                GroupButtonOptions(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          8),
+                                                              unselectedColor:
+                                                                  Colors
+                                                                      .grey[50],
+                                                              selectedColor:
+                                                                  Colors.white,
+                                                              unselectedTextStyle:
+                                                                  GoogleFonts.beVietnamPro(
                                                                       color: Colors
                                                                               .deepPurple[
                                                                           100],
                                                                       fontSize:
                                                                           12),
-                                                                  selectedTextStyle: GoogleFonts.beVietnamPro(
+                                                              selectedTextStyle:
+                                                                  GoogleFonts.beVietnamPro(
                                                                       color: Colors
                                                                           .deepPurple,
                                                                       fontSize:
                                                                           12),
-                                                                ),
-                                                                buttons:
-                                                                    duutien,
-                                                                isRadio: true,
-                                                                onSelected: (value,
-                                                                        index,
-                                                                        isSelected) =>
-                                                                    douutien =
-                                                                        index +
-                                                                            1,
-                                                              )
-                                                            ],
-                                                          ),
-                                                          Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                        .only(
-                                                                    right: 170),
-                                                            child: LocaleText(
-                                                              'tglam',
-                                                              style: GoogleFonts
-                                                                  .beVietnamPro(
-                                                                      fontSize:
-                                                                          16,
-                                                                      color: Colors
-                                                                          .white),
                                                             ),
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              GroupButton(
-                                                                  controller:
-                                                                      _grbController,
-                                                                  options:
-                                                                      GroupButtonOptions(
-                                                                    borderRadius:
-                                                                        BorderRadius
-                                                                            .circular(8),
-                                                                    unselectedColor:
-                                                                        Colors.grey[
-                                                                            50],
-                                                                    selectedColor:
-                                                                        Colors
-                                                                            .white,
-                                                                    unselectedTextStyle: GoogleFonts.beVietnamPro(
+                                                            buttons: duutien,
+                                                            isRadio: true,
+                                                            onSelected: (value,
+                                                                    index,
+                                                                    isSelected) =>
+                                                                douutien =
+                                                                    index + 1,
+                                                          )
+                                                        ],
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                right: 170),
+                                                        child: LocaleText(
+                                                          'tglam',
+                                                          style: GoogleFonts
+                                                              .beVietnamPro(
+                                                                  fontSize: 16,
+                                                                  color: Colors
+                                                                      .white),
+                                                        ),
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          GroupButton(
+                                                              controller:
+                                                                  _grbController,
+                                                              options:
+                                                                  GroupButtonOptions(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8),
+                                                                unselectedColor:
+                                                                    Colors.grey[
+                                                                        50],
+                                                                selectedColor:
+                                                                    Colors
+                                                                        .white,
+                                                                unselectedTextStyle:
+                                                                    GoogleFonts.beVietnamPro(
                                                                         color: Colors.deepPurple[
                                                                             100],
                                                                         fontSize:
                                                                             12),
-                                                                    selectedTextStyle: GoogleFonts.beVietnamPro(
+                                                                selectedTextStyle:
+                                                                    GoogleFonts.beVietnamPro(
                                                                         color: Colors
                                                                             .deepPurple,
                                                                         fontSize:
                                                                             12),
-                                                                  ),
-                                                                  buttons:
-                                                                      thoigianlamm,
-                                                                  isRadio: true,
-                                                                  onSelected:
-                                                                      (value,
-                                                                          index,
-                                                                          isSelected) {
-                                                                    if (index ==
-                                                                        0) {
-                                                                      thoigianlam =
-                                                                          ngaythang;
-                                                                    } else {
-                                                                      thoigianlam =
-                                                                          "";
-                                                                    }
-                                                                  })
-                                                            ],
+                                                              ),
+                                                              buttons:
+                                                                  thoigianlamm,
+                                                              isRadio: true,
+                                                              onSelected: (value,
+                                                                  index,
+                                                                  isSelected) {
+                                                                if (index ==
+                                                                    0) {
+                                                                  thoigianlam =
+                                                                      ngaythang;
+                                                                } else {
+                                                                  thoigianlam =
+                                                                      "";
+                                                                }
+                                                              })
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                    onPressed: () async {
+                                                      if (douutien == null ||
+                                                          txtND.text == "") {
+                                                        final snackBar =
+                                                            SnackBar(
+                                                          /// need to set following properties for best effect of awesome_snackbar_content
+                                                          elevation: 0,
+                                                          behavior:
+                                                              SnackBarBehavior
+                                                                  .floating,
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          content:
+                                                              AwesomeSnackbarContent(
+                                                            title: 'Cảnh báo',
+                                                            message:
+                                                                'Bạn chưa nhập đẩy đủ nội dung',
+
+                                                            /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+                                                            contentType:
+                                                                ContentType
+                                                                    .warning,
+                                                          ),
+                                                        );
+                                                        ScaffoldMessenger.of(
+                                                            context)
+                                                          ..hideCurrentSnackBar()
+                                                          ..showSnackBar(
+                                                              snackBar);
+                                                        return;
+                                                      }
+                                                      querySnapshots =
+                                                          await TDL.get();
+                                                      for (var snapshot
+                                                          in querySnapshots
+                                                              .docs) {
+                                                        if (toDoOJ[index].id ==
+                                                            snapshot['id']) {
+                                                          docID = snapshot.id;
+                                                        }
+                                                      }
+                                                      updateNoiDung(
+                                                          docID,
+                                                          txtND.text.toString(),
+                                                          douutien,
+                                                          thoigianlam);
+                                                      Navigator.pop(context);
+                                                      setState(() {});
+                                                      txtND.clear();
+                                                    },
+                                                    child: LocaleText(
+                                                      'thaydoi',
+                                                      style: GoogleFonts
+                                                          .beVietnamPro(
+                                                              fontSize: 18,
+                                                              color:
+                                                                  Colors.white),
+                                                    ))
+                                              ],
+                                              backgroundColor:
+                                                  Colors.deepPurple,
+                                            );
+                                          }));
+                                    },
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: lstColor[
+                                            toDoOJ[index].douutien - 1],
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Checkbox(
+                                              value: toDoOJ[index].trangthai,
+                                              onChanged: (bool? value) async {
+                                                bool checked = value!;
+                                                querySnapshots =
+                                                    await TDL.get();
+                                                for (var snapshot
+                                                    in querySnapshots.docs) {
+                                                  if (toDoOJ[index].id ==
+                                                      snapshot['id']) {
+                                                    docID = snapshot.id;
+                                                  }
+                                                }
+                                                updateToDo(docID, checked);
+                                                if (checked) {
+                                                  Noti.showNotification(
+                                                      title: 'Thông báo',
+                                                      body:
+                                                          'Bạn đã hoàn thành việc:' +
+                                                              toDoOJ[index]
+                                                                  .noidung,
+                                                      fln:
+                                                          flutterLocalNotificationsPlugin);
+                                                }
+                                                setState(() {});
+                                              }),
+                                          Text(
+                                            toDoOJ[index].noidung.toString(),
+                                            style: GoogleFonts.beVietnamPro(
+                                                color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            });
+                      }
+                      if (snapshot.hasError) {
+                        return Text('data');
+                      }
+
+                      return Center(
+                          child: SpinKitRing(
+                        size: 40,
+                        color: Colors.deepPurple,
+                      ));
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(right: 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 170),
+                        child: Row(
+                          children: [
+                            LocaleText(
+                              'desau',
+                              style: GoogleFonts.beVietnamPro(fontSize: 20),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuButton(
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                              onTap: () async {
+                                querySnapshots = await TDL.get();
+                                for (int i = 0; i < toDoLT.length; i++) {
+                                  for (var snapshot in querySnapshots.docs) {
+                                    if (toDoLT[i].id == snapshot['id']) {
+                                      docID = snapshot.id;
+                                    }
+                                  }
+                                  updateToDo(docID, !trangthai);
+                                }
+                                setState(() {});
+                              },
+                              child: Row(
+                                children: [
+                                  LocaleText(
+                                    'hoanthanhtatca',
+                                    style: GoogleFonts.beVietnamPro(
+                                        color: Colors.white),
+                                  ),
+                                  Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                  )
+                                ],
+                              )),
+                          PopupMenuItem(
+                              onTap: () async {
+                                querySnapshots = await TDL.get();
+                                for (int i = 0; i < toDoLT.length; i++) {
+                                  for (var snapshot in querySnapshots.docs) {
+                                    if (toDoLT[i].id == snapshot['id']) {
+                                      docID = snapshot.id;
+                                    }
+                                  }
+                                  deleteToDo(docID, !trangthaixoa);
+                                }
+                                setState(() {});
+                              },
+                              child: Row(
+                                children: [
+                                  LocaleText(
+                                    'xoatatca',
+                                    style: GoogleFonts.beVietnamPro(
+                                        color: Colors.white),
+                                  ),
+                                  Icon(
+                                    Icons.delete,
+                                    color: Colors.white,
+                                  )
+                                ],
+                              ))
+                        ],
+                        color: Colors.deepPurple,
+                      )
+                    ],
+                  )),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.deepPurple,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      )),
+                  child: FutureBuilder<List<ToDoObject>>(
+                    future: ToDoProvider.getLater(
+                        FirebaseAuth.instance.currentUser!.email!.toString(),
+                        trangthai,
+                        ngaythang),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        toDoLT = snapshot.data!;
+                        toDoLT
+                            .sort(((a, b) => a.douutien.compareTo(b.douutien)));
+                        return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: toDoLT.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Slidable(
+                                  endActionPane: ActionPane(
+                                    motion: StretchMotion(),
+                                    children: [
+                                      SlidableAction(
+                                        onPressed: ((context) async {
+                                          bool delete = true;
+                                          querySnapshots = await TDL.get();
+                                          for (var snapshot
+                                              in querySnapshots.docs) {
+                                            if (toDoLT[index].id ==
+                                                snapshot['id']) {
+                                              docID = snapshot.id;
+                                            }
+                                          }
+                                          deleteToDo(docID, delete);
+                                        }),
+                                        icon: Icons.delete,
+                                        backgroundColor:
+                                            Colors.deepOrangeAccent,
+                                      ),
+                                      SlidableAction(
+                                        onPressed: ((context) async {
+                                          // setState(() {});
+                                          _loadID();
+                                          id = toDO.length + 1;
+                                          addTodoCopy(
+                                              toDoLT[index].noidung,
+                                              toDoLT[index].douutien,
+                                              toDoLT[index].thoigianlam);
+                                        }),
+                                        icon: Icons.copy,
+                                        backgroundColor: Colors.redAccent,
+                                      ),
+                                    ],
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      txtND.text =
+                                          toDoLT[index].noidung.toString();
+                                      grbController.selectIndex(
+                                          toDoLT[index].douutien - 1);
+                                      douutien = toDoLT[index].douutien;
+                                      if (toDoLT[index].thoigianlam ==
+                                          ngaythang) {
+                                        _grbController.selectIndex(0);
+                                      }
+                                      if (toDoLT[index].thoigianlam !=
+                                              ngaythang ||
+                                          toDoLT[index].thoigianlam == '') {
+                                        _grbController.selectIndex(1);
+                                      }
+                                      thoigianlam = toDoLT[index].thoigianlam;
+                                      showDialog(
+                                          context: context,
+                                          builder: ((BuildContext context) {
+                                            return AlertDialog(
+                                              title: LocaleText('thaydoi',
+                                                  style:
+                                                      GoogleFonts.beVietnamPro(
+                                                          fontSize: 25,
+                                                          color: Colors.white)),
+                                              content: SingleChildScrollView(
+                                                child: SizedBox(
+                                                  height: 250,
+                                                  child: Column(
+                                                    children: [
+                                                      Stack(
+                                                        children: [
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                                color: Colors
+                                                                    .white,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8)),
+                                                            height: 100,
+                                                          ),
+                                                          Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    left: 190,
+                                                                    top: 8),
+                                                            child: Container(
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              8)),
+                                                              child: Lottie.asset(
+                                                                  'assets/writting.json',
+                                                                  fit: BoxFit
+                                                                      .cover),
+                                                            ),
+                                                          ),
+                                                          TextField(
+                                                            decoration:
+                                                                InputDecoration(
+                                                                    border:
+                                                                        InputBorder
+                                                                            .none,
+                                                                    hintText:
+                                                                        hint),
+                                                            style: GoogleFonts
+                                                                .beVietnamPro(
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .black),
+                                                            controller: txtND,
                                                           ),
                                                         ],
                                                       ),
-                                                    ),
-                                                  ),
-                                                  actions: [
-                                                    TextButton(
-                                                        onPressed: () async {
-                                                          if (douutien ==
-                                                                  null ||
-                                                              txtND.text ==
-                                                                  "") {
-                                                            final snackBar =
-                                                                SnackBar(
-                                                              /// need to set following properties for best effect of awesome_snackbar_content
-                                                              elevation: 0,
-                                                              behavior:
-                                                                  SnackBarBehavior
-                                                                      .floating,
-                                                              backgroundColor:
-                                                                  Colors
-                                                                      .transparent,
-                                                              content:
-                                                                  AwesomeSnackbarContent(
-                                                                title:
-                                                                    'Cảnh báo',
-                                                                message:
-                                                                    'Bạn chưa nhập đẩy đủ nội dung',
-
-                                                                /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
-                                                                contentType:
-                                                                    ContentType
-                                                                        .warning,
-                                                              ),
-                                                            );
-                                                            ScaffoldMessenger
-                                                                .of(context)
-                                                              ..hideCurrentSnackBar()
-                                                              ..showSnackBar(
-                                                                  snackBar);
-                                                            return;
-                                                          }
-                                                          querySnapshots =
-                                                              await TDL.get();
-                                                          for (var snapshot
-                                                              in querySnapshots
-                                                                  .docs) {
-                                                            if (toDoOJ[index]
-                                                                    .id ==
-                                                                snapshot[
-                                                                    'id']) {
-                                                              docID =
-                                                                  snapshot.id;
-                                                            }
-                                                          }
-                                                          updateNoiDung(
-                                                              docID,
-                                                              txtND.text
-                                                                  .toString(),
-                                                              douutien,
-                                                              thoigianlam);
-                                                          Navigator.pop(
-                                                              context);
-                                                          setState(() {});
-                                                          txtND.clear();
-                                                        },
+                                                      SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                right: 190),
                                                         child: LocaleText(
-                                                          'thaydoi',
+                                                          'douutien',
                                                           style: GoogleFonts
                                                               .beVietnamPro(
-                                                                  fontSize: 18,
+                                                                  fontSize: 16,
                                                                   color: Colors
                                                                       .white),
-                                                        ))
-                                                  ],
-                                                  backgroundColor:
-                                                      Colors.deepPurple,
-                                                );
-                                              }));
-                                        },
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(
-                                            color: lstColor[
-                                                toDoOJ[index].douutien - 1],
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Checkbox(
-                                                  value:
-                                                      toDoOJ[index].trangthai,
-                                                  onChanged:
-                                                      (bool? value) async {
-                                                    bool checked = value!;
-                                                    querySnapshots =
-                                                        await TDL.get();
-                                                    for (var snapshot
-                                                        in querySnapshots
-                                                            .docs) {
-                                                      if (toDoOJ[index].id ==
-                                                          snapshot['id']) {
-                                                        docID = snapshot.id;
-                                                      }
-                                                    }
-                                                    updateToDo(docID, checked);
-                                                    if (checked) {
-                                                      Noti.showNotification(
-                                                          title: 'Thông báo',
-                                                          body:
-                                                              'Bạn đã hoàn thành việc:' +
-                                                                  toDoOJ[index]
-                                                                      .noidung,
-                                                          fln:
-                                                              flutterLocalNotificationsPlugin);
-                                                    }
-                                                    setState(() {});
-                                                  }),
-                                              Text(
-                                                toDoOJ[index]
-                                                    .noidung
-                                                    .toString(),
-                                                style: GoogleFonts.beVietnamPro(
-                                                    color: Colors.white),
+                                                        ),
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          GroupButton(
+                                                            controller:
+                                                                grbController,
+                                                            options:
+                                                                GroupButtonOptions(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          8),
+                                                              unselectedColor:
+                                                                  Colors
+                                                                      .grey[50],
+                                                              selectedColor:
+                                                                  Colors.white,
+                                                              unselectedTextStyle:
+                                                                  GoogleFonts.beVietnamPro(
+                                                                      color: Colors
+                                                                              .deepPurple[
+                                                                          100],
+                                                                      fontSize:
+                                                                          12),
+                                                              selectedTextStyle:
+                                                                  GoogleFonts.beVietnamPro(
+                                                                      color: Colors
+                                                                          .deepPurple,
+                                                                      fontSize:
+                                                                          12),
+                                                            ),
+                                                            buttons: duutien,
+                                                            isRadio: true,
+                                                            onSelected: (value,
+                                                                    index,
+                                                                    isSelected) =>
+                                                                douutien =
+                                                                    index + 1,
+                                                          )
+                                                        ],
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                right: 170),
+                                                        child: LocaleText(
+                                                          'tglam',
+                                                          style: GoogleFonts
+                                                              .beVietnamPro(
+                                                                  fontSize: 16,
+                                                                  color: Colors
+                                                                      .white),
+                                                        ),
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          GroupButton(
+                                                              controller:
+                                                                  _grbController,
+                                                              options:
+                                                                  GroupButtonOptions(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8),
+                                                                unselectedColor:
+                                                                    Colors.grey[
+                                                                        50],
+                                                                selectedColor:
+                                                                    Colors
+                                                                        .white,
+                                                                unselectedTextStyle:
+                                                                    GoogleFonts.beVietnamPro(
+                                                                        color: Colors.deepPurple[
+                                                                            100],
+                                                                        fontSize:
+                                                                            12),
+                                                                selectedTextStyle:
+                                                                    GoogleFonts.beVietnamPro(
+                                                                        color: Colors
+                                                                            .deepPurple,
+                                                                        fontSize:
+                                                                            12),
+                                                              ),
+                                                              buttons:
+                                                                  thoigianlamm,
+                                                              isRadio: true,
+                                                              onSelected: (value,
+                                                                  index,
+                                                                  isSelected) {
+                                                                if (index ==
+                                                                    0) {
+                                                                  thoigianlam =
+                                                                      ngaythang;
+                                                                } else {
+                                                                  thoigianlam =
+                                                                      "";
+                                                                }
+                                                              })
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
                                               ),
-                                            ],
+                                              actions: [
+                                                TextButton(
+                                                    onPressed: () async {
+                                                      if (douutien == null ||
+                                                          txtND.text == "") {
+                                                        final snackBar =
+                                                            SnackBar(
+                                                          /// need to set following properties for best effect of awesome_snackbar_content
+                                                          elevation: 0,
+                                                          behavior:
+                                                              SnackBarBehavior
+                                                                  .floating,
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          content:
+                                                              AwesomeSnackbarContent(
+                                                            title: 'Cảnh báo',
+                                                            message:
+                                                                'Bạn chưa nhập đẩy đủ nội dung',
+
+                                                            /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+                                                            contentType:
+                                                                ContentType
+                                                                    .warning,
+                                                          ),
+                                                        );
+                                                        ScaffoldMessenger.of(
+                                                            context)
+                                                          ..hideCurrentSnackBar()
+                                                          ..showSnackBar(
+                                                              snackBar);
+                                                        return;
+                                                      }
+                                                      querySnapshots =
+                                                          await TDL.get();
+                                                      for (var snapshot
+                                                          in querySnapshots
+                                                              .docs) {
+                                                        if (toDoLT[index].id ==
+                                                            snapshot['id']) {
+                                                          docID = snapshot.id;
+                                                        }
+                                                      }
+                                                      updateNoiDung(
+                                                          docID,
+                                                          txtND.text.toString(),
+                                                          douutien,
+                                                          thoigianlam);
+                                                      Navigator.pop(context);
+                                                      setState(() {});
+                                                      txtND.clear();
+                                                    },
+                                                    child: LocaleText(
+                                                      'thaydoi',
+                                                      style: GoogleFonts
+                                                          .beVietnamPro(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 18),
+                                                    ))
+                                              ],
+                                              backgroundColor:
+                                                  Colors.deepPurple,
+                                            );
+                                          }));
+                                    },
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: lstColor[
+                                            toDoLT[index].douutien - 1],
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Checkbox(
+                                              value: toDoLT[index].trangthai,
+                                              onChanged: (bool? value) async {
+                                                bool checked = value!;
+                                                querySnapshots =
+                                                    await TDL.get();
+                                                for (var snapshot
+                                                    in querySnapshots.docs) {
+                                                  if (toDoLT[index].id ==
+                                                      snapshot['id']) {
+                                                    docID = snapshot.id;
+                                                  }
+                                                }
+                                                updateToDo(docID, checked);
+                                                if (checked) {
+                                                  Noti.showNotification(
+                                                      title: 'Thông báo',
+                                                      body:
+                                                          'Bạn đã hoàn thành việc:' +
+                                                              toDoLT[index]
+                                                                  .noidung,
+                                                      fln:
+                                                          flutterLocalNotificationsPlugin);
+                                                }
+                                                setState(() {});
+                                              }),
+                                          Text(
+                                            toDoLT[index].noidung.toString(),
+                                            style:
+                                                TextStyle(color: Colors.white),
                                           ),
-                                        ),
+                                        ],
                                       ),
                                     ),
-                                  );
-                                }),
-                          ],
-                        );
+                                  ),
+                                ),
+                              );
+                            });
                       }
                       if (snapshot.hasError) {
                         return Text('data');
@@ -826,501 +1262,8 @@ class _ViecCanLamState extends State<ViecCanLam> {
                       ));
                     },
                   ),
-                  FutureBuilder<List<ToDoObject>>(
-                    future: ToDoProvider.getLater(
-                        FirebaseAuth.instance.currentUser!.email!.toString(),
-                        trangthai,
-                        ngaythang),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        List<ToDoObject> toDoLT = snapshot.data!;
-                        toDoLT
-                            .sort(((a, b) => a.douutien.compareTo(b.douutien)));
-                        return SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              Padding(
-                                  padding: const EdgeInsets.only(right: 0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 170),
-                                        child: Row(
-                                          children: [
-                                            LocaleText(
-                                              'desau',
-                                              style: GoogleFonts.beVietnamPro(
-                                                  fontSize: 20),
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            CircleAvatar(
-                                              child: Text(
-                                                toDoLT.length.toString(),
-                                                style: GoogleFonts.beVietnamPro(
-                                                    color: Colors.white),
-                                              ),
-                                              backgroundColor:
-                                                  Colors.deepPurple,
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuButton(
-                                        itemBuilder: (context) => [
-                                          PopupMenuItem(
-                                              onTap: () async {
-                                                querySnapshots =
-                                                    await TDL.get();
-                                                for (int i = 0;
-                                                    i < toDoLT.length;
-                                                    i++) {
-                                                  for (var snapshot
-                                                      in querySnapshots.docs) {
-                                                    if (toDoLT[i].id ==
-                                                        snapshot['id']) {
-                                                      docID = snapshot.id;
-                                                    }
-                                                  }
-                                                  updateToDo(docID, !trangthai);
-                                                }
-                                                setState(() {});
-                                              },
-                                              child: Row(
-                                                children: [
-                                                  LocaleText(
-                                                    'hoanthanhtatca',
-                                                    style: GoogleFonts
-                                                        .beVietnamPro(
-                                                            color:
-                                                                Colors.white),
-                                                  ),
-                                                  Icon(
-                                                    Icons.check,
-                                                    color: Colors.white,
-                                                  )
-                                                ],
-                                              )),
-                                          PopupMenuItem(
-                                              onTap: () async {
-                                                querySnapshots =
-                                                    await TDL.get();
-                                                for (int i = 0;
-                                                    i < toDoLT.length;
-                                                    i++) {
-                                                  for (var snapshot
-                                                      in querySnapshots.docs) {
-                                                    if (toDoLT[i].id ==
-                                                        snapshot['id']) {
-                                                      docID = snapshot.id;
-                                                    }
-                                                  }
-                                                  deleteToDo(
-                                                      docID, !trangthaixoa);
-                                                }
-                                                setState(() {});
-                                              },
-                                              child: Row(
-                                                children: [
-                                                  LocaleText(
-                                                    'xoatatca',
-                                                    style: GoogleFonts
-                                                        .beVietnamPro(
-                                                            color:
-                                                                Colors.white),
-                                                  ),
-                                                  Icon(
-                                                    Icons.delete,
-                                                    color: Colors.white,
-                                                  )
-                                                ],
-                                              ))
-                                        ],
-                                        color: Colors.deepPurple,
-                                      )
-                                    ],
-                                  )),
-                              ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: toDoLT.length,
-                                  itemBuilder: (context, index) {
-                                    return Container(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Slidable(
-                                        endActionPane: ActionPane(
-                                          motion: StretchMotion(),
-                                          children: [
-                                            SlidableAction(
-                                              onPressed: ((context) async {
-                                                bool delete = true;
-                                                querySnapshots =
-                                                    await TDL.get();
-                                                for (var snapshot
-                                                    in querySnapshots.docs) {
-                                                  if (toDoLT[index].id ==
-                                                      snapshot['id']) {
-                                                    docID = snapshot.id;
-                                                  }
-                                                }
-                                                deleteToDo(docID, delete);
-                                              }),
-                                              icon: Icons.delete,
-                                              backgroundColor:
-                                                  Colors.deepOrangeAccent,
-                                            ),
-                                          ],
-                                        ),
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            txtND.text = toDoLT[index]
-                                                .noidung
-                                                .toString();
-                                            grbController.selectIndex(
-                                                toDoLT[index].douutien - 1);
-                                            douutien = toDoLT[index].douutien;
-                                            if (toDoLT[index].thoigianlam ==
-                                                ngaythang) {
-                                              _grbController.selectIndex(0);
-                                            }
-                                            if (toDoLT[index].thoigianlam !=
-                                                    ngaythang ||
-                                                toDoLT[index].thoigianlam ==
-                                                    '') {
-                                              _grbController.selectIndex(1);
-                                            }
-                                            thoigianlam =
-                                                toDoLT[index].thoigianlam;
-                                            showDialog(
-                                                context: context,
-                                                builder:
-                                                    ((BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: LocaleText('thaydoi',
-                                                        style: GoogleFonts
-                                                            .beVietnamPro(
-                                                                fontSize: 25,
-                                                                color: Colors
-                                                                    .white)),
-                                                    content:
-                                                        SingleChildScrollView(
-                                                      child: SizedBox(
-                                                        height: 250,
-                                                        child: Column(
-                                                          children: [
-                                                            Stack(
-                                                              children: [
-                                                                Container(
-                                                                  decoration: BoxDecoration(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              8)),
-                                                                  height: 100,
-                                                                ),
-                                                                Padding(
-                                                                  padding: EdgeInsets
-                                                                      .only(
-                                                                          left:
-                                                                              190,
-                                                                          top:
-                                                                              8),
-                                                                  child:
-                                                                      Container(
-                                                                    decoration: BoxDecoration(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(8)),
-                                                                    child: Lottie.asset(
-                                                                        'assets/writting.json',
-                                                                        fit: BoxFit
-                                                                            .cover),
-                                                                  ),
-                                                                ),
-                                                                TextField(
-                                                                  decoration: InputDecoration(
-                                                                      border: InputBorder
-                                                                          .none,
-                                                                      hintText:
-                                                                          hint),
-                                                                  style: GoogleFonts.beVietnamPro(
-                                                                      fontSize:
-                                                                          16,
-                                                                      color: Colors
-                                                                          .black),
-                                                                  controller:
-                                                                      txtND,
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            SizedBox(
-                                                              height: 10,
-                                                            ),
-                                                            Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                          .only(
-                                                                      right:
-                                                                          190),
-                                                              child: LocaleText(
-                                                                'douutien',
-                                                                style: GoogleFonts
-                                                                    .beVietnamPro(
-                                                                        fontSize:
-                                                                            16,
-                                                                        color: Colors
-                                                                            .white),
-                                                              ),
-                                                            ),
-                                                            Row(
-                                                              children: [
-                                                                GroupButton(
-                                                                  controller:
-                                                                      grbController,
-                                                                  options:
-                                                                      GroupButtonOptions(
-                                                                    borderRadius:
-                                                                        BorderRadius
-                                                                            .circular(8),
-                                                                    unselectedColor:
-                                                                        Colors.grey[
-                                                                            50],
-                                                                    selectedColor:
-                                                                        Colors
-                                                                            .white,
-                                                                    unselectedTextStyle: GoogleFonts.beVietnamPro(
-                                                                        color: Colors.deepPurple[
-                                                                            100],
-                                                                        fontSize:
-                                                                            12),
-                                                                    selectedTextStyle: GoogleFonts.beVietnamPro(
-                                                                        color: Colors
-                                                                            .deepPurple,
-                                                                        fontSize:
-                                                                            12),
-                                                                  ),
-                                                                  buttons:
-                                                                      duutien,
-                                                                  isRadio: true,
-                                                                  onSelected: (value,
-                                                                          index,
-                                                                          isSelected) =>
-                                                                      douutien =
-                                                                          index +
-                                                                              1,
-                                                                )
-                                                              ],
-                                                            ),
-                                                            Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                          .only(
-                                                                      right:
-                                                                          170),
-                                                              child: LocaleText(
-                                                                'tglam',
-                                                                style: GoogleFonts
-                                                                    .beVietnamPro(
-                                                                        fontSize:
-                                                                            16,
-                                                                        color: Colors
-                                                                            .white),
-                                                              ),
-                                                            ),
-                                                            Row(
-                                                              children: [
-                                                                GroupButton(
-                                                                    controller:
-                                                                        _grbController,
-                                                                    options:
-                                                                        GroupButtonOptions(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              8),
-                                                                      unselectedColor:
-                                                                          Colors
-                                                                              .grey[50],
-                                                                      selectedColor:
-                                                                          Colors
-                                                                              .white,
-                                                                      unselectedTextStyle: GoogleFonts.beVietnamPro(
-                                                                          color: Colors.deepPurple[
-                                                                              100],
-                                                                          fontSize:
-                                                                              12),
-                                                                      selectedTextStyle: GoogleFonts.beVietnamPro(
-                                                                          color: Colors
-                                                                              .deepPurple,
-                                                                          fontSize:
-                                                                              12),
-                                                                    ),
-                                                                    buttons:
-                                                                        thoigianlamm,
-                                                                    isRadio:
-                                                                        true,
-                                                                    onSelected:
-                                                                        (value,
-                                                                            index,
-                                                                            isSelected) {
-                                                                      if (index ==
-                                                                          0) {
-                                                                        thoigianlam =
-                                                                            ngaythang;
-                                                                      } else {
-                                                                        thoigianlam =
-                                                                            "";
-                                                                      }
-                                                                    })
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                          onPressed: () async {
-                                                            if (douutien ==
-                                                                    null ||
-                                                                txtND.text ==
-                                                                    "") {
-                                                              final snackBar =
-                                                                  SnackBar(
-                                                                /// need to set following properties for best effect of awesome_snackbar_content
-                                                                elevation: 0,
-                                                                behavior:
-                                                                    SnackBarBehavior
-                                                                        .floating,
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .transparent,
-                                                                content:
-                                                                    AwesomeSnackbarContent(
-                                                                  title:
-                                                                      'Cảnh báo',
-                                                                  message:
-                                                                      'Bạn chưa nhập đẩy đủ nội dung',
-
-                                                                  /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
-                                                                  contentType:
-                                                                      ContentType
-                                                                          .warning,
-                                                                ),
-                                                              );
-                                                              ScaffoldMessenger
-                                                                  .of(context)
-                                                                ..hideCurrentSnackBar()
-                                                                ..showSnackBar(
-                                                                    snackBar);
-                                                              return;
-                                                            }
-                                                            querySnapshots =
-                                                                await TDL.get();
-                                                            for (var snapshot
-                                                                in querySnapshots
-                                                                    .docs) {
-                                                              if (toDoLT[index]
-                                                                      .id ==
-                                                                  snapshot[
-                                                                      'id']) {
-                                                                docID =
-                                                                    snapshot.id;
-                                                              }
-                                                            }
-                                                            updateNoiDung(
-                                                                docID,
-                                                                txtND.text
-                                                                    .toString(),
-                                                                douutien,
-                                                                thoigianlam);
-                                                            Navigator.pop(
-                                                                context);
-                                                            setState(() {});
-                                                            txtND.clear();
-                                                          },
-                                                          child: LocaleText(
-                                                            'thaydoi',
-                                                            style: GoogleFonts
-                                                                .beVietnamPro(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                        18),
-                                                          ))
-                                                    ],
-                                                    backgroundColor:
-                                                        Colors.deepPurple,
-                                                  );
-                                                }));
-                                          },
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                              color: lstColor[
-                                                  toDoLT[index].douutien - 1],
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Checkbox(
-                                                    value:
-                                                        toDoLT[index].trangthai,
-                                                    onChanged:
-                                                        (bool? value) async {
-                                                      bool checked = value!;
-                                                      querySnapshots =
-                                                          await TDL.get();
-                                                      for (var snapshot
-                                                          in querySnapshots
-                                                              .docs) {
-                                                        if (toDoLT[index].id ==
-                                                            snapshot['id']) {
-                                                          docID = snapshot.id;
-                                                        }
-                                                      }
-                                                      updateToDo(
-                                                          docID, checked);
-                                                      if (checked) {
-                                                        Noti.showNotification(
-                                                            title: 'Thông báo',
-                                                            body: 'Bạn đã hoàn thành việc:' +
-                                                                toDoLT[index]
-                                                                    .noidung,
-                                                            fln:
-                                                                flutterLocalNotificationsPlugin);
-                                                      }
-                                                      setState(() {});
-                                                    }),
-                                                Text(
-                                                  toDoLT[index]
-                                                      .noidung
-                                                      .toString(),
-                                                  style: TextStyle(
-                                                      color: Colors.white),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }),
-                            ],
-                          ),
-                        );
-                      }
-                      return Text("");
-                    },
-                  ),
-                ],
-              ),
+                ),
+              )
             ],
           ),
           onWillPop: () async {

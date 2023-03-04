@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_locales/flutter_locales.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -86,37 +87,16 @@ class _ViecHoanThanhState extends State<ViecHoanThanh> {
                     child: Lottie.asset('assets/completed.json',
                         fit: BoxFit.cover),
                   ),
-                  ListView(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                              padding: const EdgeInsets.only(right: 100),
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  LocaleText(
-                                    'sohoanthanh',
-                                    style:
-                                        GoogleFonts.beVietnamPro(fontSize: 20),
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  CircleAvatar(
-                                    child: Text(
-                                      toDoOJ.length.toString(),
-                                      style: GoogleFonts.beVietnamPro(
-                                          color: Colors.white),
-                                    ),
-                                    backgroundColor: Colors.deepPurple,
-                                  )
-                                ],
-                              )),
-                          ListView.builder(
+                      LocaleText(
+                        'sohoanthanh'.tr,
+                        style: GoogleFonts.beVietnamPro(fontSize: 18),
+                      ),
+                      Expanded(
+                        child: Container(
+                          child: ListView.builder(
                               shrinkWrap: true,
                               itemCount: toDoOJ.length,
                               itemBuilder: (context, index) {
@@ -169,8 +149,8 @@ class _ViecHoanThanhState extends State<ViecHoanThanh> {
                                   ),
                                 );
                               }),
-                        ],
-                      ),
+                        ),
+                      )
                     ],
                   )
                 ],
